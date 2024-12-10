@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const participantSchema = new mongoose.Schema({
-    name: {
+    firstName: {
         type: String,
         required: true,
         trim: true
@@ -23,10 +23,50 @@ const participantSchema = new mongoose.Schema({
             message: 'Invalid email format'
         }
     },
-   
+    phone: {
+        type: String,
+        trim: true,
+        required: true, 
+    },
+    NationalCartId: {
+        type: number,
+        required: true, 
+    },
+    teamName: {
+        type: String,
+        trim: true,
+        required: true, 
+    },
+    registrationDate: {
+        type: Date,
+        default: Date.now,
+    },
+    skills: [{
+        type: String,
+        required: true, 
+    }],
+    participationCategory: {
+        type: String,
+        enum: ['front end', 'backend developer', 'full stack developer', 'designer', ' ai developer'], 
+        required: true, 
+    },
+    participatedBefore:{
+        type:Boolean,
+        required:true,
+    },
+    githubLink:{
+        type: String,
+        required:true,
+    },
+    linkedinLink:{
+        type: String,
+        required:false,
+    },
+    portfolioLink:{
+        type: String,
+        required:false,
+    }
 });
 
-
-
 const ParticipantModel = mongoose.model('Participant', participantSchema);
-export  { ParticipantModel };
+export { ParticipantModel };
