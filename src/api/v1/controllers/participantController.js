@@ -97,6 +97,7 @@ export const getParticipantByName = async (req, res) => {
 export const generateExcel = async (req, res) => {
     try {
         const participants = await ParticipantModel.find().sort({ teamName: 1 });
+
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Participants');
         worksheet.columns = [
@@ -116,12 +117,12 @@ export const generateExcel = async (req, res) => {
         ];
         participants.forEach(participant => {
             worksheet.addRow({
+                teamName: participant.teamName,
                 firstName: participant.firstName,
                 lastName: participant.lastName,
                 email: participant.email,
                 phone: participant.phone,
                 NationalCartId: participant.NationalCartId,
-                teamName: participant.teamName,
                 registrationDate: participant.registrationDate,
                 skills: participant.skills.join(', '),
                 participationCategory: participant.participationCategory,
@@ -131,15 +132,14 @@ export const generateExcel = async (req, res) => {
                 portfolioLink: participant.portfolioLink || 'N/A',
             });
         });
-
-        
         let startRow = 2; 
         for (let i = 0; i < participants.length; i++) {
             const currentTeam = participants[i].teamName;
             const nextTeam = participants[i + 1]?.teamName;
             if (currentTeam !== nextTeam || i === participants.length - 1) {
+                
                 if (startRow !== i + 2) {
-                    worksheet.mergeCells(`F${startRow}:F${i + 2}`);
+                    worksheet.mergeCells(`A${startRow}:A${i + 2}`);
                 }
                 startRow = i + 3; 
             }
@@ -158,5 +158,3 @@ export const generateExcel = async (req, res) => {
         res.status(500).json({ message: 'Error generating Excel file', error: error.message });
     }
 };
-
-
