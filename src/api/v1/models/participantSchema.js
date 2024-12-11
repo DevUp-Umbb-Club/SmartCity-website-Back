@@ -14,7 +14,6 @@ const participantSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true,
         trim: true,
         validate: {
             validator: function(v) {
@@ -29,7 +28,7 @@ const participantSchema = new mongoose.Schema({
         required: true, 
     },
     NationalCartId: {
-        type: number,
+        type: Number,
         required: true, 
     },
     teamName: {
