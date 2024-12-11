@@ -96,18 +96,16 @@ export const getParticipantByName = async (req, res) => {
 };
 export const generateExcel = async (req, res) => {
     try {
-        const participants = await ParticipantModel.find();
-
+        const participants = await ParticipantModel.find().sort({ teamName: 1 });
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Participants');
-
         worksheet.columns = [
+            { header: 'Team Name', key: 'teamName', width: 20 },
             { header: 'First Name', key: 'firstName', width: 20 },
             { header: 'Last Name', key: 'lastName', width: 20 },
             { header: 'Email', key: 'email', width: 30 },
             { header: 'Phone', key: 'phone', width: 15 },
             { header: 'National Cart ID', key: 'NationalCartId', width: 20 },
-            { header: 'Team Name', key: 'teamName', width: 20 },
             { header: 'Registration Date', key: 'registrationDate', width: 20 },
             { header: 'Skills', key: 'skills', width: 30 },
             { header: 'Participation Category', key: 'participationCategory', width: 20 },
@@ -116,7 +114,6 @@ export const generateExcel = async (req, res) => {
             { header: 'LinkedIn Link', key: 'linkedinLink', width: 30 },
             { header: 'Portfolio Link', key: 'portfolioLink', width: 30 },
         ];
-
         participants.forEach(participant => {
             worksheet.addRow({
                 firstName: participant.firstName,
@@ -135,6 +132,18 @@ export const generateExcel = async (req, res) => {
             });
         });
 
+        
+        let startRow = 2; 
+        for (let i = 0; i < participants.length; i++) {
+            const currentTeam = participants[i].teamName;
+            const nextTeam = participants[i + 1]?.teamName;
+            if (currentTeam !== nextTeam || i === participants.length - 1) {
+                if (startRow !== i + 2) {
+                    worksheet.mergeCells(`F${startRow}:F${i + 2}`);
+                }
+                startRow = i + 3; 
+            }
+        }
         res.setHeader(
             'Content-Type',
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -143,11 +152,11 @@ export const generateExcel = async (req, res) => {
             'Content-Disposition',
             'attachment; filename=participants.xlsx'
         );
-
         await workbook.xlsx.write(res);
         res.end();
     } catch (error) {
         res.status(500).json({ message: 'Error generating Excel file', error: error.message });
     }
 };
+
 

@@ -46,7 +46,7 @@ const participantSchema = new mongoose.Schema({
     }],
     participationCategory: {
         type: String,
-        enum: ['front end', 'backend developer', 'full stack developer', 'designer', ' ai developer'], 
+        enum: ['frontend developer', 'backend developer', 'fullstack developer', 'designer', 'ai developer', 'mobile developer'], 
         required: true, 
     },
     participatedBefore:{
