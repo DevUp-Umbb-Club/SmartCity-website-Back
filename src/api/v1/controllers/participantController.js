@@ -1,4 +1,5 @@
 import { ParticipantModel } from "../models/participantSchema.js";
+import ExcelJS from 'exceljs';
 export const addParticipant = async (req, res) => {
     try {
         const participantData = req.body;
@@ -93,3 +94,60 @@ export const getParticipantByName = async (req, res) => {
         });
     }
 };
+export const generateExcel = async (req, res) => {
+    try {
+        const participants = await ParticipantModel.find();
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Participants');
+
+        worksheet.columns = [
+            { header: 'First Name', key: 'firstName', width: 20 },
+            { header: 'Last Name', key: 'lastName', width: 20 },
+            { header: 'Email', key: 'email', width: 30 },
+            { header: 'Phone', key: 'phone', width: 15 },
+            { header: 'National Cart ID', key: 'NationalCartId', width: 20 },
+            { header: 'Team Name', key: 'teamName', width: 20 },
+            { header: 'Registration Date', key: 'registrationDate', width: 20 },
+            { header: 'Skills', key: 'skills', width: 30 },
+            { header: 'Participation Category', key: 'participationCategory', width: 20 },
+            { header: 'Participated Before', key: 'participatedBefore', width: 15 },
+            { header: 'GitHub Link', key: 'githubLink', width: 30 },
+            { header: 'LinkedIn Link', key: 'linkedinLink', width: 30 },
+            { header: 'Portfolio Link', key: 'portfolioLink', width: 30 },
+        ];
+
+        participants.forEach(participant => {
+            worksheet.addRow({
+                firstName: participant.firstName,
+                lastName: participant.lastName,
+                email: participant.email,
+                phone: participant.phone,
+                NationalCartId: participant.NationalCartId,
+                teamName: participant.teamName,
+                registrationDate: participant.registrationDate,
+                skills: participant.skills.join(', '),
+                participationCategory: participant.participationCategory,
+                participatedBefore: participant.participatedBefore ? 'Yes' : 'No',
+                githubLink: participant.githubLink,
+                linkedinLink: participant.linkedinLink || 'N/A',
+                portfolioLink: participant.portfolioLink || 'N/A',
+            });
+        });
+
+        res.setHeader(
+            'Content-Type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+        res.setHeader(
+            'Content-Disposition',
+            'attachment; filename=participants.xlsx'
+        );
+
+        await workbook.xlsx.write(res);
+        res.end();
+    } catch (error) {
+        res.status(500).json({ message: 'Error generating Excel file', error: error.message });
+    }
+};
+
